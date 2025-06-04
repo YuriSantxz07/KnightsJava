@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adicionar Produto - TechNova</title>
+    <link rel="stylesheet" href="assets/css/main.css">
+    <link rel="stylesheet" href="assets/css/forms.css">
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <img src="assets/images/logo.svg" alt="TechNova Logo" class="logo">
+            <h1>Adicionar Novo Produto</h1>
+        </div>
+    </header>
+    
+    <nav class="navbar">
+        <div class="container">
+            <ul>
+                <li><a href="index.html">Início</a></li>
+                <li><a href="products.html">Produtos</a></li>
+                <li><a href="add-product.html" class="active">Adicionar Produto</a></li>
+            </ul>
+        </div>
+    </nav>
+    
+    <main class="container">
+        <section class="product-form">
+            <form id="add-product-form">
+                <div class="form-group">
+                    <label for="product-name">Nome do Produto</label>
+                    <input type="text" id="product-name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="product-description">Descrição</label>
+                    <textarea id="product-description" rows="4" required></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="product-price">Preço (R$)</label>
+                    <input type="number" id="product-price" step="0.01" min="0" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="product-quantity">Quantidade em Estoque</label>
+                    <input type="number" id="product-quantity" min="0" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="product-image">Imagem do Produto (URL)</label>
+                    <input type="url" id="product-image">
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Cadastrar Produto</button>
+                    <button type="reset" class="btn btn-secondary">Limpar</button>
+                </div>
+            </form>
+        </section>
+    </main>
+    
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2023 TechNova - Todos os direitos reservados</p>
+        </div>
+    </footer>
+    
+    <script src="assets/js/productService.js"></script>
+    <script src="assets/js/addProduct.js"></script>
+</body>
+</html>
