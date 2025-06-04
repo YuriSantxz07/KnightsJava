@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 async function updateDashboardStats() {
     try {
-        const response = await fetch('https://api.technova.com/products');
+        const response = await axios.get('http://localhost:8080/api/produtos');
         const products = await response.json();
         
         document.getElementById('total-products').textContent = products.length;
