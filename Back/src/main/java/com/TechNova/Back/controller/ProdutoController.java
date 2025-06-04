@@ -35,6 +35,13 @@ public class ProdutoController {
         return ResponseEntity.ok(produtos);
     }
 
+    @GetMapping("/{id}/fotos")
+    public ResponseEntity<List<String>> getFotosProduto(@PathVariable Integer id) {
+        List<String> fotos = produtoService.getFotosProduto(id);
+        return ResponseEntity.ok(fotos);
+    }
+
+
     @PutMapping("/{id}")
     public ResponseEntity<ProdutoDTO> updateProduto(@PathVariable Integer id, @RequestBody ProdutoDTO produtoDTO) {
         ProdutoDTO updated = produtoService.updateProduto(id, produtoDTO);
@@ -45,5 +52,15 @@ public class ProdutoController {
     public ResponseEntity<Void> deleteProduto(@PathVariable Integer id) {
         produtoService.deleteProduto(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{id}/estoque")
+    public ResponseEntity<ProdutoDTO> atualizarEstoque(@PathVariable Integer id, @RequestParam int quantidade) {
+        try {
+            ProdutoDTO atualizado = produtoService.updateEstoque(id, quantidade);
+            return ResponseEntity.ok(atualizado);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(null);
+        }
     }
 }

@@ -60,6 +60,33 @@ public class ProdutoService {
         produtoRepository.deleteById(id);
     }
 
+    @Transactional
+    public ProdutoDTO updateEstoque(Integer id, int quantidade) {
+        Produto produto = produtoRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Produto não encontrado com id: " + id));
+
+        int novaQuantidade = produto.getQuantidade() + quantidade;
+        if (novaQuantidade < 0) {
+            throw new IllegalArgumentException("Quantidade em estoque não pode ser negativa");
+        }
+
+        produto.setQuantidade(novaQuantidade);
+        return mapEntityToDto(produtoRepository.save(produto));
+    }
+
+    @Transactional(readOnly = true)
+    public List<String> getFotosProduto(Integer produtoId) {
+        Produto produto = produtoRepository.findById(produtoId)
+                .orElseThrow(() -> new IllegalArgumentException("Produto não encontrado com id: " + produtoId));
+
+        if (produto.getImagens() == null) return List.of();
+
+        return produto.getImagens().stream()
+                .map(ImagemProduto::getUrlImagem)
+                .collect(Collectors.toList());
+    }
+
+
     private void mapDtoToEntity(ProdutoDTO dto, Produto produto) {
         produto.setNome(dto.getNome());
         produto.setTextoDescritivo(dto.getTextoDescritivo());
