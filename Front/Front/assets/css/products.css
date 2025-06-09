@@ -68,7 +68,6 @@
 }
 
 /* Botões de ação */
-/* Botões de ação */
 .action-btn {
     padding: 10px 22px;
     margin: 0 6px;
@@ -116,6 +115,16 @@ td.actions {
     padding-top: 10px;
     padding-bottom: 10px;
 }
+
+/* Estilo do container de botões */
+td.actions {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+}
+
 
 
 
