@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Editar Produto - TechNova</title>
+  <link rel="stylesheet" href="assets/css/main.css" />
+  <link rel="stylesheet" href="assets/css/forms.css" />
+  <link rel="stylesheet" href="assets/css/add-product.css" />
+</head>
+<body>
+  <header class="header">
+    <div class="container">
+      <img src="assets/images/logo.svg" alt="TechNova Logo" class="logo" />
+      <h1>Editar Produto</h1>
+    </div>
+  </header>
+
+  <nav class="navbar">
+    <div class="container">
+      <ul>
+        <li><a href="index.html">Início</a></li>
+        <li><a href="products.html">Produtos</a></li>
+        <li><a href="add-product.html">Adicionar Produto</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main class="container">
+    <div class="product-layout">
+      <!-- Imagem -->
+      <div class="image-side">
+        <label for="product-file" class="image-preview" id="image-preview-label">
+          <img id="image-output" src="https://via.placeholder.com/500x300?text=Imagem+do+Produto" alt="Pré-visualização da Imagem" />
+        </label>
+        <input type="file" id="product-file" accept="image/*" hidden />
+        <div class="form-group">
+          <label for="product-image">Imagem do Produto (URL)</label>
+          <input type="url" id="product-image" placeholder="https://exemplo.com/imagem.jpg" />
+        </div>
+      </div>
+
+      <!-- Formulário -->
+      <section class="form-wrapper">
+        <form id="edit-product-form">
+          <div class="form-group">
+            <label for="product-name">Nome do Produto</label>
+            <input type="text" id="product-name" required />
+          </div>
+
+          <div class="form-group">
+            <label for="product-description">Descrição</label>
+            <textarea id="product-description" rows="4" required></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="product-price">Preço (R$)</label>
+            <input type="number" id="product-price" step="0.01" min="0" required />
+          </div>
+
+          <div class="form-group">
+            <label for="product-quantity">Quantidade em Estoque</label>
+            <input type="number" id="product-quantity" min="0" required />
+          </div>
+
+          <div class="form-group">
+            <label for="product-color">Cor</label>
+            <input type="text" id="product-color" />
+          </div>
+
+          <div class="form-group">
+            <label for="product-brand">Fabricante</label>
+            <input type="text" id="product-brand" />
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+            <button type="reset" class="btn btn-secondary">Cancelar</button>
+          </div>
+        </form>
+      </section>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <p>&copy; 2023 TechNova - Todos os direitos reservados</p>
+    </div>
+  </footer>
+
+  <script>
+    // Obtem ID da URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const productId = urlParams.get('id');
+
+    // Função para carregar os dados do produto
+    async function carregarProduto(id) {
+      try {
+        const response = await fetch(`http://localhost:8080/api/produtos/${id}`);
+        if (!response.ok) throw new Error("Produto não encontrado");
+
+        const produto = await response.json();
+
+        // Preenche os campos
+        document.getElementById('product-name').value = produto.nome;
+        document.getElementById('product-description').value = produto.descricao;
+        document.getElementById('product-price').value = produto.preco;
+        document.getElementById('product-quantity').value = produto.quantidade;
+        document.getElementById('product-color').value = produto.cor || '';
+        document.getElementById('product-brand').value = produto.fabricante || '';
+        document.getElementById('product-image').value = produto.imagem || '';
+        document.getElementById('image-output').src = produto.imagem || 'https://via.placeholder.com/500x300';
+      } catch (error) {
+        alert("Erro ao carregar produto: " + error.message);
+      }
+    }
+
+    // Envia os dados atualizados
+    document.getElementById('edit-product-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const produtoAtualizado = {
+        nome: document.getElementById('product-name').value,
+        textoDescritivo: document.getElementById('product-description').value,
+        preco: parseFloat(document.getElementById('product-price').value),
+        quantidade: parseInt(document.getElementById('product-quantity').value),
+        cor: document.getElementById('product-color').value,
+        fabricante: document.getElementById('product-brand').value,
+        imagem: document.getElementById('product-image').value,
+      };
+
+      try {
+        const response = await fetch(`http://localhost:8080/api/produtos/${productId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(produtoAtualizado)
+        });
+
+        if (response.ok) {
+          alert("Produto atualizado com sucesso!");
+          window.location.href = "products.html";
+        } else {
+          throw new Error("Erro ao atualizar");
+        }
+      } catch (error) {
+        alert("Erro ao salvar: " + error.message);
+      }
+    });
+
+    // Carrega dados ao iniciar
+    if (productId) carregarProduto(productId);
+    else alert("ID do produto não informado na URL");
+  </script>
+</body>
+</html>

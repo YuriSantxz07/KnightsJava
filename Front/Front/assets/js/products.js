@@ -155,7 +155,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                 }
             }
         } else if (e.target.classList.contains('edit-btn')) {
-            window.location.href = `/editar-produto.html?id=${id}`;
+            window.location.href = `/Front/edit-product.html?id=${id}`;
         }
     });
 

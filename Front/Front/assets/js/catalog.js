@@ -108,7 +108,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 
             infoContainer.innerHTML = `
                 <h3 class="product-title">${product.nome}</h3>
-                <p class="product-description">${product.descricao}</p>
+                <p class="product-description">${product.textoDescritivo}</p>
                 <div class="product-price">${formattedPrice}</div>
                 <div class="product-stock">
                     <span class="stock-icon ${stockStatus}"></span>
