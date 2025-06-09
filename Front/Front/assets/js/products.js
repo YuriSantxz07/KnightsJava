@@ -1,106 +1,158 @@
-// Lógica da página de listagem de produtos
-document.addEventListener('DOMContentLoaded', async function() {
-    await loadProducts();
-    
-    // Configura busca
-    document.getElementById('search-product').addEventListener('input', debounce(searchProducts, 300));
-    
-    // Configura botão de atualizar
-    document.getElementById('refresh-products').addEventListener('click', loadProducts);
-});
+document.addEventListener('DOMContentLoaded', async function () {
+    const tableBody = document.querySelector('#product-table tbody');
+    const searchInput = document.getElementById('search-product');
+    const refreshButton = document.getElementById('refresh-products');
+    const BASE_API_URL = 'http://localhost:8080/api/produtos';
 
-async function loadProducts() {
-    try {
-        const products = await ProductService.getAllProducts();
-        renderProducts(products);
-    } catch (error) {
-        showMessage('Erro ao carregar produtos. Tente novamente.', 'error');
+    // Armazenar todos os produtos carregados
+    let allProducts = [];
+
+    // Função para carregar e renderizar produtos
+    async function loadProducts() {
+        try {
+            tableBody.innerHTML = '<tr><td colspan="8">Carregando produtos...</td></tr>';
+            const response = await axios.get(BASE_API_URL);
+            allProducts = response.data;
+            await renderProducts(allProducts);
+        } catch (error) {
+            console.error('Erro ao carregar produtos:', error);
+            tableBody.innerHTML = '<tr><td colspan="8">Erro ao carregar produtos.</td></tr>';
+        }
+    }
+
+    // Função para renderizar produtos na tabela
+   async function renderProducts(products) {
+    tableBody.innerHTML = '';
+    for (const product of products) {
+        // Buscar fotos do produto
+        let imageUrl = 'https://via.placeholder.com/100x100?text=Sem+Imagem';
+        try {
+            const fotosResponse = await axios.get(`${BASE_API_URL}/${product.id}/fotos`);
+            const fotos = fotosResponse.data;
+            if (Array.isArray(fotos) && fotos.length > 0) {
+                imageUrl = fotos[0];
+            }
+        } catch (fotoError) {
+            console.warn(`Erro ao buscar fotos do produto ${product.id}:`, fotoError);
+        }
+
+        // Formatar preço
+        const formattedPrice = new Intl.NumberFormat('pt-BR', {
+            style: 'currency',
+            currency: 'BRL'
+        }).format(product.preco);
+
+        // Criar linha da tabela
+        const row = document.createElement('tr');
+
+        // Coluna Imagem
+        const imgCell = document.createElement('td');
+        const img = document.createElement('img');
+        img.src = imageUrl;
+        img.alt = product.nome;
+        img.width = 80;
+        img.height = 80;
+        img.onerror = () => img.src = 'https://via.placeholder.com/100x100?text=Erro';
+        imgCell.appendChild(img);
+        row.appendChild(imgCell);
+
+        // Coluna Nome
+        const nomeCell = document.createElement('td');
+        nomeCell.textContent = product.nome || '';
+        row.appendChild(nomeCell);
+
+        // Coluna Descrição (texto_descritivo)
+        const descCell = document.createElement('td');
+        descCell.textContent = product.texto_descritivo || '';
+        row.appendChild(descCell);
+
+        // Coluna Cor
+        const corCell = document.createElement('td');
+        corCell.textContent = product.cor || '';
+        row.appendChild(corCell);
+
+        // Coluna Fabricante
+        const fabCell = document.createElement('td');
+        fabCell.textContent = product.fabricante || '';
+        row.appendChild(fabCell);
+
+        // Coluna Preço
+        const precoCell = document.createElement('td');
+        precoCell.textContent = formattedPrice;
+        row.appendChild(precoCell);
+
+        // Coluna Estoque (quantidade)
+        const estoqueCell = document.createElement('td');
+        estoqueCell.textContent = product.quantidade != null ? product.quantidade : '';
+        row.appendChild(estoqueCell);
+
+        // Coluna Ações
+        const actionsCell = document.createElement('td');
+        
+        const editBtn = document.createElement('button');
+        editBtn.textContent = 'Editar';
+        editBtn.classList.add('edit-btn');
+        editBtn.dataset.id = product.id;
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.textContent = 'Excluir';
+        deleteBtn.classList.add('delete-btn');
+        deleteBtn.dataset.id = product.id;
+
+        actionsCell.appendChild(editBtn);
+        actionsCell.appendChild(deleteBtn);
+        row.appendChild(actionsCell);
+
+        tableBody.appendChild(row);
     }
 }
 
-function renderProducts(products) {
-    const tbody = document.querySelector('#products-table tbody');
-    tbody.innerHTML = '';
-    
-    if (products.length === 0) {
-        const tr = document.createElement('tr');
-        tr.innerHTML = '<td colspan="6" style="text-align: center;">Nenhum produto encontrado</td>';
-        tbody.appendChild(tr);
-        return;
-    }
-    
-    products.forEach(product => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td>${product.id}</td>
-            <td>${product.name}</td>
-            <td>${product.description.substring(0, 50)}${product.description.length > 50 ? '...' : ''}</td>
-            <td>R$ ${product.price.toFixed(2)}</td>
-            <td>${product.quantity}</td>
-            <td>
-                <button class="action-btn edit-btn" data-id="${product.id}">Editar</button>
-                <button class="action-btn delete-btn" data-id="${product.id}">Excluir</button>
-            </td>
-        `;
-        tbody.appendChild(tr);
-    });
-    
-    // Configura eventos dos botões
-    document.querySelectorAll('.edit-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const productId = this.getAttribute('data-id');
-            window.location.href = `edit-product.html?id=${productId}`;
+
+    // Função de busca
+    function filterProducts(searchTerm) {
+        if (!searchTerm.trim()) {
+            return allProducts;
+        }
+        const term = searchTerm.toLowerCase();
+        return allProducts.filter(product => {
+            return (
+                (product.nome && product.nome.toLowerCase().includes(term)) ||
+                (product.marca && product.marca.toLowerCase().includes(term)) ||
+                (product.fabricante && product.fabricante.toLowerCase().includes(term)) ||
+                (product.cor && product.cor.toLowerCase().includes(term))
+            );
         });
+    }
+
+    // Event listeners
+    searchInput.addEventListener('input', () => {
+        const filteredProducts = filterProducts(searchInput.value);
+        renderProducts(filteredProducts);
     });
-    
-    document.querySelectorAll('.delete-btn').forEach(btn => {
-        btn.addEventListener('click', async function() {
-            const productId = this.getAttribute('data-id');
-            if (confirm('Tem certeza que deseja excluir este produto?')) {
+
+    refreshButton.addEventListener('click', loadProducts);
+
+    // Delegação de evento para botões editar/excluir
+    tableBody.addEventListener('click', async function (e) {
+        const id = e.target.dataset.id;
+        if (!id) return;
+
+        if (e.target.classList.contains('delete-btn')) {
+            if (confirm('Deseja realmente excluir este produto?')) {
                 try {
-                    await ProductService.deleteProduct(productId);
-                    showMessage('Produto excluído com sucesso!', 'success');
-                    await loadProducts();
-                } catch (error) {
-                    showMessage('Erro ao excluir produto.', 'error');
+                    await axios.delete(`${BASE_API_URL}/${id}`);
+                    alert('Produto excluído com sucesso.');
+                    loadProducts();
+                } catch (err) {
+                    console.error('Erro ao excluir produto:', err);
+                    alert('Erro ao excluir produto.');
                 }
             }
-        });
-    });
-}
-
-function searchProducts() {
-    const searchTerm = document.getElementById('search-product').value.toLowerCase();
-    const rows = document.querySelectorAll('#products-table tbody tr');
-    
-    rows.forEach(row => {
-        const name = row.cells[1].textContent.toLowerCase();
-        const description = row.cells[2].textContent.toLowerCase();
-        
-        if (name.includes(searchTerm) || description.includes(searchTerm)) {
-            row.style.display = '';
-        } else {
-            row.style.display = 'none';
+        } else if (e.target.classList.contains('edit-btn')) {
+            window.location.href = `/editar-produto.html?id=${id}`;
         }
     });
-}
 
-function debounce(func, wait) {
-    let timeout;
-    return function() {
-        const context = this, args = arguments;
-        clearTimeout(timeout);
-        timeout = setTimeout(() => func.apply(context, args), wait);
-    };
-}
-
-function showMessage(text, type) {
-    const messageDiv = document.createElement('div');
-    messageDiv.className = `message ${type}`;
-    messageDiv.textContent = text;
-    
-    const main = document.querySelector('main');
-    main.insertBefore(messageDiv, main.firstChild);
-    
-    setTimeout(() => messageDiv.remove(), 5000);
-}
+    // Carregar produtos inicialmente
+    loadProducts();
+});

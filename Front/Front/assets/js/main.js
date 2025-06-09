@@ -7,14 +7,14 @@ document.addEventListener('DOMContentLoaded', function() {
 async function updateDashboardStats() {
     try {
         const response = await axios.get('http://localhost:8080/api/produtos');
-        const products = await response.json();
-        
+        const products = response.data; // ✅ agora "products" está definido
+
         document.getElementById('total-products').textContent = products.length;
-        
-        const inStock = products.filter(p => p.quantity > 0).length;
+
+        const inStock = products.filter(p => p.estoque > 0).length;
         document.getElementById('in-stock').textContent = inStock;
-        
-        const lowStock = products.filter(p => p.quantity > 0 && p.quantity < 5).length;
+
+        const lowStock = products.filter(p => p.estoque > 0 && p.estoque < 5).length;
         document.getElementById('low-stock').textContent = lowStock;
     } catch (error) {
         console.error('Erro ao carregar estatísticas:', error);

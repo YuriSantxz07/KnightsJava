@@ -6,6 +6,9 @@
     <title>Produtos - TechNova</title>
     <link rel="stylesheet" href="assets/css/main.css">
     <link rel="stylesheet" href="assets/css/products.css">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="assets/js/products.js"></script>
+
 </head>
 <body>
     <header class="header">
@@ -32,12 +35,14 @@
         </section>
         
         <section class="product-list">
-            <table id="products-table">
+            <table id="product-table">
                 <thead>
                     <tr>
-                        <th>ID</th>
+                        <th></th>
                         <th>Nome</th>
                         <th>Descrição</th>
+                        <th>Cor</th>
+                        <th>Fabricante</th>
                         <th>Preço</th>
                         <th>Estoque</th>
                         <th>Ações</th>
