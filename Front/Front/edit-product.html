@@ -31,7 +31,7 @@
       <!-- Imagem -->
       <div class="image-side">
         <label for="product-file" class="image-preview" id="image-preview-label">
-          <img id="image-output" src="https://via.placeholder.com/500x300?text=Imagem+do+Produto" alt="Pré-visualização da Imagem" />
+          <img id="image-output" src="https://placehold.co/500x300?text=Imagem+do+Produto" alt="Pré-visualização da Imagem" />
         </label>
         <input type="file" id="product-file" accept="image/*" hidden />
         <div class="form-group">
@@ -88,20 +88,22 @@
     </div>
   </footer>
 
+  <!-- Axios CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
   <script>
-    // Obtem ID da URL
     const urlParams = new URLSearchParams(window.location.search);
     const productId = urlParams.get('id');
 
-    // Função para carregar os dados do produto
     async function carregarProduto(id) {
       try {
-        const response = await fetch(`http://localhost:8080/api/produtos/${id}`);
-        if (!response.ok) throw new Error("Produto não encontrado");
+        const produtoResp = await axios.get(`http://localhost:8080/api/produtos/${id}`);
+        const fotoResp = await axios.get(`http://localhost:8080/api/produtos/${id}/fotos`);
 
-        const produto = await response.json();
+        const produto = produtoResp.data;
+        const imagem = fotoResp.data?.url_imagem || 'https://placehold.co/500x300?text=Imagem+do+Produto';
 
-        // Preenche os campos
+        // Preenche os campos do formulário
         document.getElementById('product-name').value = produto.nome;
         document.getElementById('product-description').value = produto.textoDescritivo;
         document.getElementById('product-price').value = produto.preco;
@@ -109,13 +111,12 @@
         document.getElementById('product-color').value = produto.cor || '';
         document.getElementById('product-brand').value = produto.fabricante || '';
         document.getElementById('product-image').value = produto.imagem || '';
-        document.getElementById('image-output').src = produto.imagem || 'https://via.placeholder.com/500x300';
+        document.getElementById('image-output').src = imagem;
       } catch (error) {
-        alert("Erro ao carregar produto: " + error.message);
+        alert("Erro ao carregar produto: " + (error.response?.data?.message || error.message));
       }
     }
 
-    // Envia os dados atualizados
     document.getElementById('edit-product-form').addEventListener('submit', async (e) => {
       e.preventDefault();
 
@@ -130,26 +131,19 @@
       };
 
       try {
-        const response = await fetch(`http://localhost:8080/api/produtos/${productId}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(produtoAtualizado)
-        });
-
-        if (response.ok) {
-          alert("Produto atualizado com sucesso!");
-          window.location.href = "products.html";
-        } else {
-          throw new Error("Erro ao atualizar");
-        }
+        await axios.put(`http://localhost:8080/api/produtos/${productId}`, produtoAtualizado);
+        alert("Produto atualizado com sucesso!");
+        window.location.href = "products.html";
       } catch (error) {
-        alert("Erro ao salvar: " + error.message);
+        alert("Erro ao salvar: " + (error.response?.data?.message || error.message));
       }
     });
 
-    // Carrega dados ao iniciar
-    if (productId) carregarProduto(productId);
-    else alert("ID do produto não informado na URL");
+    if (productId) {
+      carregarProduto(productId);
+    } else {
+      alert("ID do produto não informado na URL");
+    }
   </script>
 </body>
 </html>
