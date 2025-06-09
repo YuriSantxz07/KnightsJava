@@ -4,15 +4,25 @@ document.addEventListener('DOMContentLoaded', async function () {
     const refreshButton = document.getElementById('refresh-products');
     const BASE_API_URL = 'http://localhost:8080/api/produtos';
 
-    // Armazenar todos os produtos carregados
     let allProducts = [];
 
-    // Função para carregar e renderizar produtos
     async function loadProducts() {
         try {
             tableBody.innerHTML = '<tr><td colspan="8">Carregando produtos...</td></tr>';
             const response = await axios.get(BASE_API_URL);
-            allProducts = response.data;
+
+            // Remove produtos duplicados com base no ID
+            const uniqueProducts = [];
+            const seenIds = new Set();
+
+            for (const prod of response.data) {
+                if (prod.id && !seenIds.has(prod.id)) {
+                    seenIds.add(prod.id);
+                    uniqueProducts.push(prod);
+                }
+            }
+
+            allProducts = uniqueProducts;
             renderProducts(allProducts);
         } catch (error) {
             console.error('Erro ao carregar produtos:', error);
@@ -20,12 +30,12 @@ document.addEventListener('DOMContentLoaded', async function () {
         }
     }
 
-    // Função para renderizar produtos na tabela
     async function renderProducts(products) {
         tableBody.innerHTML = '';
 
         for (const product of products) {
             let imageUrl = 'https://via.placeholder.com/100x100?text=Sem+Imagem';
+
             try {
                 const fotosResponse = await axios.get(`${BASE_API_URL}/${product.id}/fotos`);
                 const fotos = fotosResponse.data;
@@ -59,10 +69,14 @@ document.addEventListener('DOMContentLoaded', async function () {
             nomeCell.textContent = product.nome || '';
             row.appendChild(nomeCell);
 
-            // Descrição (aceita texto_descritivo ou descricao)
+            // Descrição (verifica várias possibilidades de chave)
             const descCell = document.createElement('td');
-            descCell.textContent = product.texto_descritivo || product.descricao || '';
+            descCell.textContent =
+                product.textoDescritivo || 
+                product.descricao || 
+                'Sem descrição';
             row.appendChild(descCell);
+
 
             // Cor
             const corCell = document.createElement('td');
@@ -106,22 +120,18 @@ document.addEventListener('DOMContentLoaded', async function () {
         }
     }
 
-    // Função de busca
     function filterProducts(searchTerm) {
         if (!searchTerm.trim()) return allProducts;
 
         const term = searchTerm.toLowerCase();
-        return allProducts.filter(product => {
-            return (
-                (product.nome && product.nome.toLowerCase().includes(term)) ||
-                (product.marca && product.marca.toLowerCase().includes(term)) ||
-                (product.fabricante && product.fabricante.toLowerCase().includes(term)) ||
-                (product.cor && product.cor.toLowerCase().includes(term))
-            );
-        });
+        return allProducts.filter(product =>
+            (product.nome && product.nome.toLowerCase().includes(term)) ||
+            (product.marca && product.marca.toLowerCase().includes(term)) ||
+            (product.fabricante && product.fabricante.toLowerCase().includes(term)) ||
+            (product.cor && product.cor.toLowerCase().includes(term))
+        );
     }
 
-    // Event listeners
     searchInput.addEventListener('input', () => {
         const filteredProducts = filterProducts(searchInput.value);
         renderProducts(filteredProducts);
@@ -149,6 +159,5 @@ document.addEventListener('DOMContentLoaded', async function () {
         }
     });
 
-    // Inicial
     await loadProducts();
 });

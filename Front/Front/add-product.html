@@ -1,73 +1,96 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Adicionar Produto - TechNova</title>
-    <link rel="stylesheet" href="assets/css/main.css">
-    <link rel="stylesheet" href="assets/css/forms.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Adicionar Produto - TechNova</title>
+  <link rel="stylesheet" href="assets/css/main.css" />
+  <link rel="stylesheet" href="assets/css/forms.css" />
+   <link rel="stylesheet" href="assets/css/add-product.css" />
+
 </head>
 <body>
-    <header class="header">
-        <div class="container">
-            <img src="assets/images/logo.svg" alt="TechNova Logo" class="logo">
-            <h1>Adicionar Novo Produto</h1>
+  <header class="header">
+    <div class="container">
+      <img src="assets/images/logo.svg" alt="TechNova Logo" class="logo" />
+      <h1>Adicionar Novo Produto</h1>
+    </div>
+  </header>
+
+  <nav class="navbar">
+    <div class="container">
+      <ul>
+        <li><a href="index.html">Início</a></li>
+        <li><a href="products.html">Produtos</a></li>
+        <li><a href="add-product.html" class="active">Adicionar Produto</a></li>
+      </ul>
+    </div>
+  </nav>
+
+ <main class="container">
+  <div class="product-layout">
+    <!-- Lado esquerdo: Imagem + campo de URL -->
+    <div class="image-side">
+      <label for="product-file" class="image-preview" id="image-preview-label">
+        <img id="image-output" src="https://via.placeholder.com/500x300?text=Clique+para+selecionar+uma+imagem" alt="Pré-visualização da Imagem" />
+      </label>
+      <input type="file" id="product-file" accept="image/*" hidden />
+      <div class="form-group">
+        <label for="product-image">Imagem do Produto (URL)</label>
+        <input type="url" id="product-image" placeholder="https://exemplo.com/imagem.jpg" />
+      </div>
+    </div>
+
+    <!-- Lado direito: Formulário -->
+    <section class="form-wrapper">
+      <form id="add-product-form">
+        <div class="form-group">
+          <label for="product-name">Nome do Produto</label>
+          <input type="text" id="product-name" required />
         </div>
-    </header>
-    
-    <nav class="navbar">
-        <div class="container">
-            <ul>
-                <li><a href="index.html">Início</a></li>
-                <li><a href="products.html">Produtos</a></li>
-                <li><a href="add-product.html" class="active">Adicionar Produto</a></li>
-            </ul>
+
+        <div class="form-group">
+          <label for="product-description">Descrição</label>
+          <textarea id="product-description" rows="4" required></textarea>
         </div>
-    </nav>
-    
-    <main class="container">
-        <section class="product-form">
-            <form id="add-product-form">
-                <div class="form-group">
-                    <label for="product-name">Nome do Produto</label>
-                    <input type="text" id="product-name" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="product-description">Descrição</label>
-                    <textarea id="product-description" rows="4" required></textarea>
-                </div>
-                
-                <div class="form-group">
-                    <label for="product-price">Preço (R$)</label>
-                    <input type="number" id="product-price" step="0.01" min="0" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="product-quantity">Quantidade em Estoque</label>
-                    <input type="number" id="product-quantity" min="0" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="product-image">Imagem do Produto (URL)</label>
-                    <input type="url" id="product-image">
-                </div>
-                
-                <div class="form-actions">
-                    <button type="submit" class="btn btn-primary">Cadastrar Produto</button>
-                    <button type="reset" class="btn btn-secondary">Limpar</button>
-                </div>
-            </form>
-        </section>
-    </main>
-    
-    <footer class="footer">
-        <div class="container">
-            <p>&copy; 2023 TechNova - Todos os direitos reservados</p>
+
+        <div class="form-group">
+          <label for="product-price">Preço (R$)</label>
+          <input type="number" id="product-price" step="0.01" min="0" required />
         </div>
-    </footer>
-    
-    <script src="assets/js/productService.js"></script>
-    <script src="assets/js/addProduct.js"></script>
+
+        <div class="form-group">
+          <label for="product-quantity">Quantidade em Estoque</label>
+          <input type="number" id="product-quantity" min="0" required />
+        </div>
+
+        <div class="form-group">
+          <label for="product-color">Cor</label>
+          <input type="text" id="product-color" placeholder="Ex: Preto, Azul, Vermelho" />
+        </div>
+
+        <div class="form-group">
+          <label for="product-brand">Fabricante</label>
+          <input type="text" id="product-brand" placeholder="Ex: Samsung, LG, Apple" />
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">Cadastrar Produto</button>
+          <button type="reset" class="btn btn-secondary">Limpar</button>
+        </div>
+      </form>
+    </section>
+  </div>
+</main>
+
+
+  <footer class="footer">
+    <div class="container">
+      <p>&copy; 2023 TechNova - Todos os direitos reservados</p>
+    </div>
+  </footer>
+
+  <script src="assets/js/productService.js"></script>
+  <script src="assets/js/addProduct.js"></script>
 </body>
 </html>
