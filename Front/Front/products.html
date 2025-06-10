@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Produtos - TechNova</title>
+    <link rel="stylesheet" href="assets/css/main.css">
+    <link rel="stylesheet" href="assets/css/products.css">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="assets/js/products.js"></script>
+
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <img src="assets/images/logo.svg" alt="TechNova Logo" class="logo">
+            <h1>Catálogo de Produtos</h1>
+        </div>
+    </header>
+    
+    <nav class="navbar">
+        <div class="container">
+            <ul>
+                <li><a href="index.html">Início</a></li>
+                <li><a href="products.html" class="active">Produtos</a></li>
+                <li><a href="add-product.html">Adicionar Produto</a></li>
+            </ul>
+        </div>
+    </nav>
+    
+    <main class="container">
+        <section class="product-actions">
+            <input type="text" id="search-product" placeholder="Buscar produto...">
+            <button id="refresh-products" class="btn">Atualizar Lista</button>
+        </section>
+        
+        <section class="product-list">
+            <table id="product-table">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Nome</th>
+                        <th>Descrição</th>
+                        <th>Cor</th>
+                        <th>Fabricante</th>
+                        <th>Preço</th>
+                        <th>Estoque</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Produtos serão carregados via JavaScript -->
+                </tbody>
+            </table>
+        </section>
+    </main>
+    
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2023 TechNova - Todos os direitos reservados</p>
+        </div>
+    </footer>
+    
+    <script src="assets/js/productService.js"></script>
+    <script src="assets/js/products.js"></script>
+</body>
+</html>
