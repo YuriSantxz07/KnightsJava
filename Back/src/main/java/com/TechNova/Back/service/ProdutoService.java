@@ -50,7 +50,15 @@ public class ProdutoService {
     public ProdutoDTO updateProduto(Integer id, ProdutoDTO dto) {
         Produto produto = produtoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
+
+        // Limpa imagens antigas para evitar conflito com orphanRemoval
+        if (produto.getImagens() != null) {
+            produto.getImagens().clear();
+        }
+
+        // Atualiza campos e adiciona novas imagens
         mapDtoToEntity(dto, produto);
+
         produtoRepository.save(produto);
         return mapEntityToDto(produto);
     }
@@ -95,16 +103,25 @@ public class ProdutoService {
         produto.setPreco(dto.getPreco());
         produto.setQuantidade(dto.getQuantidade());
 
+        // Atualiza imagens corretamente
         if (dto.getImagens() != null) {
-            List<ImagemProduto> imagens = dto.getImagens().stream()
-                    .map(url -> {
-                        ImagemProduto imagem = new ImagemProduto();
-                        imagem.setUrlImagem(url);
-                        imagem.setProduto(produto);
-                        return imagem;
-                    })
-                    .collect(Collectors.toList());
-            produto.setImagens(imagens);
+            // 1) Remove imagens que não existem mais no DTO
+            produto.getImagens().removeIf(imagem -> !dto.getImagens().contains(imagem.getUrlImagem()));
+
+            // 2) Adiciona imagens novas do DTO que ainda não existem
+            for (String url : dto.getImagens()) {
+                boolean existe = produto.getImagens().stream()
+                        .anyMatch(img -> img.getUrlImagem().equals(url));
+                if (!existe) {
+                    ImagemProduto novaImagem = new ImagemProduto();
+                    novaImagem.setUrlImagem(url);
+                    novaImagem.setProduto(produto);
+                    produto.getImagens().add(novaImagem);
+                }
+            }
+        } else {
+            // Se dto.getImagens() for null, limpa a lista para refletir remoção de todas as imagens
+            produto.getImagens().clear();
         }
     }
 
