@@ -1,4 +1,7 @@
 # KnightsJava
 
 # Integrantes
-# Matheus Brito, Yuri Santos, Gabriel Matheus, Vinicius Biancolini
+Matheus Brito
+Yuri Santo
+Gabriel Matheus
+Vinicius Biancolini
