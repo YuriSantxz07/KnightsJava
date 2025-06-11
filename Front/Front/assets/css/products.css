@@ -186,3 +186,39 @@ td.actions {
         margin-top: 10px;
     }
 }
+
+    /* Adições rápidas para múltiplas imagens */
+    #images-preview-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    #images-preview-container div {
+      position: relative;
+    }
+
+    .preview-img {
+      width: 120px;
+      height: 120px;
+      object-fit: cover;
+      border-radius: 8px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.2);
+    }
+
+    #images-preview-container button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      background: red;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+      font-weight: bold;
+      transform: translate(50%, -50%);
+    }
+
