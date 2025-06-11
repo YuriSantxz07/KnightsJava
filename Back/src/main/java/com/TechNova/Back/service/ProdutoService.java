@@ -8,10 +8,13 @@ import com.TechNova.Back.repository.ImagemProdutoRepository;
 import com.TechNova.Back.repository.ProdutoRepository;
 
 
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -84,16 +87,51 @@ public class ProdutoService {
     }
 
     @Transactional(readOnly = true)
-    public List<String> getFotosProduto(Integer produtoId) {
-        Produto produto = produtoRepository.findById(produtoId)
-                .orElseThrow(() -> new IllegalArgumentException("Produto não encontrado com id: " + produtoId));
+    public List<String> getFotosProduto(Integer id) {
+        Produto produto = produtoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
 
-        if (produto.getImagens() == null) return List.of();
-
-        return produto.getImagens().stream()
+        return produto.getImagens()
+                .stream()
                 .map(ImagemProduto::getUrlImagem)
-                .collect(Collectors.toList());
+                .toList();
     }
+
+    @Transactional
+    public void adicionarFoto(Integer id, String urlFoto) {
+        Produto produto = produtoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
+
+        ImagemProduto novaImagem = new ImagemProduto();
+        novaImagem.setUrlImagem(urlFoto);
+        novaImagem.setProduto(produto);
+
+        produto.getImagens().add(novaImagem);
+        produtoRepository.save(produto);
+    }
+
+    public void salvarImagemUpload(Integer produtoId, MultipartFile imagem) throws IOException {
+        Produto produto = produtoRepository.findById(produtoId)
+                .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
+
+        // Supondo que você salve imagens como URL em banco
+        String caminhoSalvo = armazenamentoService.salvar(imagem); // você deve implementar isso
+
+        ImagemProduto foto = new ImagemProduto();
+        foto.setProduto(produto);
+        foto.setUrlImagem(caminhoSalvo);
+        imagemProdutoRepository.save(foto);
+    }
+
+
+    @Transactional
+    public void removerTodasFotos(Integer produtoId) {
+        Produto produto = produtoRepository.findById(produtoId)
+                .orElseThrow(() -> new EntityNotFoundException("Produto não encontrado"));
+
+        imagemProdutoRepository.deleteByProduto(produto);
+    }
+
 
 
     private void mapDtoToEntity(ProdutoDTO dto, Produto produto) {

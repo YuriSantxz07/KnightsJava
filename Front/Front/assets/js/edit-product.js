@@ -68,24 +68,36 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.getElementById('edit-product-form').addEventListener('submit', async (e) => {
     e.preventDefault();
-
+  
     const produtoAtualizado = {
       nome: document.getElementById('product-name').value,
       textoDescritivo: document.getElementById('product-description').value,
       preco: parseFloat(document.getElementById('product-price').value),
       quantidade: parseInt(document.getElementById('product-quantity').value),
       cor: document.getElementById('product-color').value,
-      fabricante: document.getElementById('product-brand').value,
-      imagens: imagensProduto
+      fabricante: document.getElementById('product-brand').value
     };
-
+  
     try {
+      // Atualiza o produto
       await axios.put(`http://localhost:8080/api/produtos/${productId}`, produtoAtualizado);
+  
+      // Remove todas as imagens antigas
+      await axios.delete(`http://localhost:8080/api/produtos/${productId}/fotos`);
+  
+      // Adiciona cada imagem nova
+      for (const url of imagensProduto) {
+        await axios.post(`http://localhost:8080/api/produtos/${productId}/fotos`, {
+          url: url
+        });
+      }
+  
       alert("Produto atualizado com sucesso!");
       window.location.href = "products.html";
+  
     } catch (error) {
       alert("Erro ao salvar: " + (error.response?.data?.message || error.message));
     }
-  });
+  });  
 });
 

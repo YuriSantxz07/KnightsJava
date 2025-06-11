@@ -2,6 +2,7 @@ package com.TechNova.Back.controller;
 
 
 
+import com.TechNova.Back.DTO.FotoDTO;
 import com.TechNova.Back.DTO.ProdutoDTO;
 import com.TechNova.Back.service.ProdutoService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,10 +38,33 @@ public class ProdutoController {
 
     @GetMapping("/{id}/fotos")
     public ResponseEntity<List<String>> getFotosProduto(@PathVariable Integer id) {
-        List<String> fotos = produtoService.getFotosProduto(id);
-        return ResponseEntity.ok(fotos);
+        List<String> urls = produtoService.getFotosProduto(id);
+        return ResponseEntity.ok(urls);
     }
 
+
+    @PostMapping("/{id}/fotos")
+    public ResponseEntity<Void> adicionarFoto(@PathVariable Integer id, @RequestBody FotoDTO fotoDTO) {
+        produtoService.adicionarFoto(id, fotoDTO.getUrl());
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/{id}/fotos")
+    public ResponseEntity<Void> removerTodasFotos(@PathVariable Integer id) {
+        produtoService.removerTodasFotos(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{id}/fotos/upload")
+    public ResponseEntity<Void> uploadImagem(@PathVariable Integer id, @RequestParam("imagem") MultipartFile imagem) {
+        try {
+            produtoService.salvarImagemUpload(id, imagem);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).build();
+        }
+    }
 
     @PutMapping("/{id}")
     public ResponseEntity<ProdutoDTO> updateProduto(@PathVariable Integer id, @RequestBody ProdutoDTO produtoDTO) {
