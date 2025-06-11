@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -50,7 +51,15 @@ public class ProdutoService {
     public ProdutoDTO updateProduto(Integer id, ProdutoDTO dto) {
         Produto produto = produtoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
+
+        // Limpa imagens antigas para evitar conflito com orphanRemoval
+        if (produto.getImagens() != null) {
+            produto.getImagens().clear();
+        }
+
+        // Atualiza campos e adiciona novas imagens
         mapDtoToEntity(dto, produto);
+
         produtoRepository.save(produto);
         return mapEntityToDto(produto);
     }
@@ -95,18 +104,32 @@ public class ProdutoService {
         produto.setPreco(dto.getPreco());
         produto.setQuantidade(dto.getQuantidade());
 
+        // Garante que a lista de imagens esteja inicializada
+        if (produto.getImagens() == null) {
+            produto.setImagens(new ArrayList<>());
+        }
+
         if (dto.getImagens() != null) {
-            List<ImagemProduto> imagens = dto.getImagens().stream()
-                    .map(url -> {
-                        ImagemProduto imagem = new ImagemProduto();
-                        imagem.setUrlImagem(url);
-                        imagem.setProduto(produto);
-                        return imagem;
-                    })
-                    .collect(Collectors.toList());
-            produto.setImagens(imagens);
+            // Remove imagens que não estão mais no DTO
+            produto.getImagens().removeIf(imagem -> !dto.getImagens().contains(imagem.getUrlImagem()));
+
+            // Adiciona novas imagens do DTO que ainda não existem na entidade
+            for (String url : dto.getImagens()) {
+                boolean existe = produto.getImagens().stream()
+                        .anyMatch(img -> img.getUrlImagem().equals(url));
+                if (!existe) {
+                    ImagemProduto novaImagem = new ImagemProduto();
+                    novaImagem.setUrlImagem(url);
+                    novaImagem.setProduto(produto);
+                    produto.getImagens().add(novaImagem);
+                }
+            }
+        } else {
+            // Se dto.getImagens() for null, limpa a lista existente
+            produto.getImagens().clear();
         }
     }
+
 
     private ProdutoDTO mapEntityToDto(Produto produto) {
         ProdutoDTO dto = new ProdutoDTO();
@@ -117,11 +140,13 @@ public class ProdutoService {
         dto.setFabricante(produto.getFabricante());
         dto.setPreco(produto.getPreco());
         dto.setQuantidade(produto.getQuantidade());
+
         if (produto.getImagens() != null) {
             dto.setImagens(produto.getImagens().stream()
                     .map(ImagemProduto::getUrlImagem)
                     .collect(Collectors.toList()));
         }
+
         return dto;
     }
 }

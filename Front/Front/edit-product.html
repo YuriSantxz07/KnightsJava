@@ -6,12 +6,12 @@
   <title>Editar Produto - TechNova</title>
   <link rel="stylesheet" href="assets/css/main.css" />
   <link rel="stylesheet" href="assets/css/forms.css" />
-  <link rel="stylesheet" href="assets/css/add-product.css" />
+  <link rel="stylesheet" href="assets/css/edit-product.css"/>
 </head>
 <body>
   <header class="header">
     <div class="container">
-      <img src="assets/images/logo.svg" alt="TechNova Logo" class="logo" />
+      <img src="assets/images/logo.jpg" alt="TechNova Logo" class="logo" />
       <h1>Editar Produto</h1>
     </div>
   </header>
@@ -29,14 +29,14 @@
   <main class="container">
     <div class="product-layout">
       <!-- Imagem -->
+      <!-- Imagens do Produto -->
       <div class="image-side">
-        <label for="product-file" class="image-preview" id="image-preview-label">
-          <img id="image-output" src="https://placehold.co/500x300?text=Imagem+do+Produto" alt="Pré-visualização da Imagem" />
-        </label>
-        <input type="file" id="product-file" accept="image/*" hidden />
+        <div class="images-gallery" id="images-gallery"></div>
+
         <div class="form-group">
-          <label for="product-image">Imagem do Produto (URL)</label>
-          <input type="url" id="product-image" placeholder="https://exemplo.com/imagem.jpg" />
+          <label for="new-image-url">Adicionar nova imagem (URL)</label>
+          <input type="url" id="new-image-url" placeholder="https://exemplo.com/imagem.jpg" />
+          <button type="button" class="btn btn-add" onclick="adicionarImagem()">Adicionar Imagem</button>
         </div>
       </div>
 
@@ -90,60 +90,7 @@
 
   <!-- Axios CDN -->
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script src="assets/js/edit-product.js"></script>
 
-  <script>
-    const urlParams = new URLSearchParams(window.location.search);
-    const productId = urlParams.get('id');
-
-    async function carregarProduto(id) {
-      try {
-        const produtoResp = await axios.get(`http://localhost:8080/api/produtos/${id}`);
-        const fotoResp = await axios.get(`http://localhost:8080/api/produtos/${id}/fotos`);
-
-        const produto = produtoResp.data;
-        const imagem = fotoResp.data?.url_imagem || 'https://placehold.co/500x300?text=Imagem+do+Produto';
-
-        // Preenche os campos do formulário
-        document.getElementById('product-name').value = produto.nome;
-        document.getElementById('product-description').value = produto.textoDescritivo;
-        document.getElementById('product-price').value = produto.preco;
-        document.getElementById('product-quantity').value = produto.quantidade;
-        document.getElementById('product-color').value = produto.cor || '';
-        document.getElementById('product-brand').value = produto.fabricante || '';
-        document.getElementById('product-image').value = produto.imagem || '';
-        document.getElementById('image-output').src = imagem;
-      } catch (error) {
-        alert("Erro ao carregar produto: " + (error.response?.data?.message || error.message));
-      }
-    }
-
-    document.getElementById('edit-product-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-
-      const produtoAtualizado = {
-        nome: document.getElementById('product-name').value,
-        textoDescritivo: document.getElementById('product-description').value,
-        preco: parseFloat(document.getElementById('product-price').value),
-        quantidade: parseInt(document.getElementById('product-quantity').value),
-        cor: document.getElementById('product-color').value,
-        fabricante: document.getElementById('product-brand').value,
-        imagem: document.getElementById('product-image').value,
-      };
-
-      try {
-        await axios.put(`http://localhost:8080/api/produtos/${productId}`, produtoAtualizado);
-        alert("Produto atualizado com sucesso!");
-        window.location.href = "products.html";
-      } catch (error) {
-        alert("Erro ao salvar: " + (error.response?.data?.message || error.message));
-      }
-    });
-
-    if (productId) {
-      carregarProduto(productId);
-    } else {
-      alert("ID do produto não informado na URL");
-    }
-  </script>
 </body>
 </html>

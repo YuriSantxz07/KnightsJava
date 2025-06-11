@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', async function () {
+    
     const catalogContainer = document.getElementById('catalog-container');
 
     if (!catalogContainer) {
@@ -10,12 +11,64 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     const BASE_API_URL = 'http://localhost:8080/api/produtos';
 
+    // =========================
+    // ROTAÇÃO DE MINIATURAS
+    // =========================
+    const rotacaoProdutos = [];
+    let intervaloGlobalIniciado = false;
+
+    function registrarRotacao(mainImg, thumbnailsContainer) {
+        const thumbs = Array.from(thumbnailsContainer.querySelectorAll('.product-thumbnail'));
+        let currentIndex = 0;
+        let isHovered = false;
+
+        function updateImage(index) {
+            currentIndex = index;
+            mainImg.style.opacity = 0;
+            setTimeout(() => {
+                mainImg.src = thumbs[currentIndex].src;
+                mainImg.style.opacity = 1;
+            }, 200);
+
+            thumbs.forEach((t, i) => {
+                t.classList.toggle('selected', i === currentIndex);
+            });
+        }
+
+        updateImage(0);
+
+        mainImg.addEventListener('mouseenter', () => isHovered = true);
+        mainImg.addEventListener('mouseleave', () => isHovered = false);
+
+        thumbs.forEach((thumb, index) => {
+            thumb.addEventListener('click', () => updateImage(index));
+        });
+
+        rotacaoProdutos.push({ mainImg, thumbs, currentIndex, isHovered, updateImage });
+
+        if (!intervaloGlobalIniciado) {
+            iniciarRotacaoGlobal();
+            intervaloGlobalIniciado = true;
+        }
+    }
+
+    function iniciarRotacaoGlobal() {
+        setInterval(() => {
+            rotacaoProdutos.forEach(produto => {
+                if (!produto.isHovered) {
+                    produto.currentIndex = (produto.currentIndex + 1) % produto.thumbs.length;
+                    produto.updateImage(produto.currentIndex);
+                }
+            });
+        }, 6000);
+    }
+    
     try {
         const response = await axios.get(BASE_API_URL);
         const products = response.data;
 
         for (const product of products) {
-            // Busca as fotos do produto
+            // Buscar fotos do produto
             let fotos = [];
             try {
                 const fotosResponse = await axios.get(`${BASE_API_URL}/${product.id}/fotos`);
@@ -26,14 +79,17 @@ document.addEventListener('DOMContentLoaded', async function () {
                 console.warn(`Erro ao buscar fotos do produto ${product.id}:`, fotoError);
             }
 
-            // Se não tiver fotos, usa a imagem default como única foto
+            // Fallback para imagem padrão
             if (fotos.length === 0) {
                 fotos = ['assets/images/products/default-product.jpg'];
             }
 
             const productCard = document.createElement('div');
             productCard.className = `product-card ${product.destaque ? 'featured-product' : ''}`;
-            let stockStatus, stockText;
+
+            // Status de estoque
+            let stockStatus = '';
+            let stockText = '';
             if (product.quantidade === 0) {
                 stockStatus = 'out-of-stock';
                 stockText = 'Produto Esgotado';
@@ -45,16 +101,18 @@ document.addEventListener('DOMContentLoaded', async function () {
                 stockText = `Disponível (${product.quantidade}+ em estoque)`;
             }
 
+            // Etiqueta
             const badgeHTML = product.etiqueta
                 ? `<span class="product-badge">${product.etiqueta}</span>`
                 : '';
 
+            // Formatar preço
             const formattedPrice = new Intl.NumberFormat('pt-BR', {
                 style: 'currency',
                 currency: 'BRL'
             }).format(product.preco);
 
-            // Container imagem principal
+            // Container da imagem principal
             const imageContainer = document.createElement('div');
             imageContainer.className = 'product-image-container';
             imageContainer.innerHTML = badgeHTML;
@@ -69,7 +127,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             };
             imageContainer.appendChild(mainImg);
 
-            // Container miniaturas
+            // Container de miniaturas
             const thumbnailsContainer = document.createElement('div');
             thumbnailsContainer.className = 'product-thumbnails';
 
@@ -79,33 +137,20 @@ document.addEventListener('DOMContentLoaded', async function () {
                 thumbImg.alt = `${product.nome} miniatura ${index + 1}`;
                 thumbImg.className = 'product-thumbnail';
                 thumbImg.style.cursor = 'pointer';
-                if (index === 0) thumbImg.classList.add('selected'); // Primeira miniatura selecionada
+                if (index === 0) thumbImg.classList.add('selected');
                 thumbImg.onerror = () => {
                     thumbImg.onerror = null;
                     thumbImg.src = 'assets/images/products/default-product.jpg';
                 };
-
-                // Ao clicar, troca imagem principal e marca miniatura selecionada
-                thumbImg.addEventListener('click', () => {
-                    mainImg.src = fotoUrl;
-
-                    // Remove 'selected' de todas as miniaturas
-                    const allThumbs = thumbnailsContainer.querySelectorAll('.product-thumbnail');
-                    allThumbs.forEach(t => t.classList.remove('selected'));
-
-                    // Marca essa como selecionada
-                    thumbImg.classList.add('selected');
-                });
-
                 thumbnailsContainer.appendChild(thumbImg);
             });
 
             imageContainer.appendChild(thumbnailsContainer);
+            registrarRotacao(mainImg, thumbnailsContainer);
 
-            // Container info produto
+            // Container de informações
             const infoContainer = document.createElement('div');
             infoContainer.className = 'product-info';
-
             infoContainer.innerHTML = `
                 <h3 class="product-title">${product.nome}</h3>
                 <p class="product-description">${product.textoDescritivo}</p>
@@ -118,7 +163,6 @@ document.addEventListener('DOMContentLoaded', async function () {
 
             productCard.appendChild(imageContainer);
             productCard.appendChild(infoContainer);
-
             catalogContainer.appendChild(productCard);
         }
     } catch (error) {
