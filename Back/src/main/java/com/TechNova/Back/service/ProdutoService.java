@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -103,12 +104,16 @@ public class ProdutoService {
         produto.setPreco(dto.getPreco());
         produto.setQuantidade(dto.getQuantidade());
 
-        // Atualiza imagens corretamente
+        // Garante que a lista de imagens esteja inicializada
+        if (produto.getImagens() == null) {
+            produto.setImagens(new ArrayList<>());
+        }
+
         if (dto.getImagens() != null) {
-            // 1) Remove imagens que não existem mais no DTO
+            // Remove imagens que não estão mais no DTO
             produto.getImagens().removeIf(imagem -> !dto.getImagens().contains(imagem.getUrlImagem()));
 
-            // 2) Adiciona imagens novas do DTO que ainda não existem
+            // Adiciona novas imagens do DTO que ainda não existem na entidade
             for (String url : dto.getImagens()) {
                 boolean existe = produto.getImagens().stream()
                         .anyMatch(img -> img.getUrlImagem().equals(url));
@@ -120,10 +125,11 @@ public class ProdutoService {
                 }
             }
         } else {
-            // Se dto.getImagens() for null, limpa a lista para refletir remoção de todas as imagens
+            // Se dto.getImagens() for null, limpa a lista existente
             produto.getImagens().clear();
         }
     }
+
 
     private ProdutoDTO mapEntityToDto(Produto produto) {
         ProdutoDTO dto = new ProdutoDTO();
@@ -134,11 +140,13 @@ public class ProdutoService {
         dto.setFabricante(produto.getFabricante());
         dto.setPreco(produto.getPreco());
         dto.setQuantidade(produto.getQuantidade());
+
         if (produto.getImagens() != null) {
             dto.setImagens(produto.getImagens().stream()
                     .map(ImagemProduto::getUrlImagem)
                     .collect(Collectors.toList()));
         }
+
         return dto;
     }
 }
