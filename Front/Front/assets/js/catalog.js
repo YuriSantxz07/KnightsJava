@@ -93,12 +93,15 @@ document.addEventListener('DOMContentLoaded', async function () {
             if (product.quantidade === 0) {
                 stockStatus = 'out-of-stock';
                 stockText = 'Produto Esgotado';
-            } else if (product.quantidade < 5) {
+            } else if (product.quantidade < 5 && product.quantidade > 1 ) {
                 stockStatus = 'low-stock';
                 stockText = `Últimas ${product.quantidade} unidades!`;
-            } else {
+            } else if (product.quantidade === 1){
+                stockStatus = 'low-stock';
+                stockText = `Última unidade restante!`;
+            }else {
                 stockStatus = 'in-stock';
-                stockText = `Disponível (${product.quantidade}+ em estoque)`;
+                stockText = `Disponível (+${product.quantidade} em estoque)`;
             }
 
             // Etiqueta
