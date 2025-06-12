@@ -4,4 +4,5 @@
 Matheus Brito, 
 Yuri Santos, 
 Gabriel Matheus, 
-Vinicius Biancolini, 
+Vinicius Biancolini
+
