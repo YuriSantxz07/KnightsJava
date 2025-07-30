@@ -3,6 +3,6 @@
 # Integrantes
 Matheus Brito, 
 Yuri Santos, 
-Gabriel Matheus, 
+Gabriel Mateus, 
 Vinicius Biancolini
 
